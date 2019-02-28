@@ -9,97 +9,30 @@
 #include <readline/history.h>
 
 #include "gsh.h"
+#include "gsh_gc.h"
+#include "gsh_parser.h"
 
-char *path = NULL;
-char **args = NULL;
 int sig_int;
 
 static char *line = (char *)NULL;
 static char prompt[1024];
 
-static void handler_default(int sig) {
+static void handler_ctrlc(int sig) {
     sig_int = 1;
     printf("\n");
+    // Cleanup
     _gc(line);
     rl_free_line_state();
     rl_cleanup_after_signal();
 }
 
-static char *trim(char *text) {
-    int len = strlen(text);
-    int start, end;
-    for (start = 0; start < len; ++start)
-        if (text[start] != ' ' && text[start] != '\n')
-            break;
-    for (end = len - 1; end >= 0; --end)
-        if (text[end] != ' ' && text[end] != '\n')
-            break;
-
-    char *new_text = text + start;
-    *(text + end + 1) = '\0';
-
-    return new_text;
-}
-
-int parse_args(char *line, int *argl) {
-    char *s = line;
-    char *p = line;
-    while (*p != ' ' && *p != '\0') {
-        ++p;
-    }
-    path = (char *)malloc((p - s + 1) * sizeof(char));
-    strncpy(path, s, p - s);
-    path[p - s] = '\0';
-
-    int buf_size = 8;
-    *argl = 0;
-    args = (char **)malloc((buf_size) * sizeof(char *));
-    p = line;
-    while (*p != '\0') {
-        char *arg_s;
-        char *arg_t;
-        while (*p == ' ' && *p != '\0')
-            ++p;
-        arg_s = p;
-        if (*p == '"') {
-            ++arg_s;
-            ++p;
-            while (*p != '"') {
-                if (*p == '\0')
-                    return -1;
-                ++p;
-            }
-            arg_t = p;
-            ++p;
-        } else if (*p == '\'') {
-            ++arg_s;
-            ++p;
-            while (*p != '\'') {
-                if (*p == '\0')
-                    return -1;
-                ++p;
-            }
-            arg_t = p;
-            ++p;
-        } else {
-            while (*p != ' ' && *p != '\0') 
-                ++p;
-        }
-        arg_t = p;
-        ++(*argl);
-        char *arg = (char *)malloc((arg_t - arg_s + 1) * sizeof(char));
-        strncpy(arg, arg_s, arg_t - arg_s);
-        arg[arg_t - arg_s] = '\0';
-        args[*argl - 1] = arg;
-        if (*argl >= buf_size) {
-            buf_size <<= 1;
-            args = (char **)realloc(args, (buf_size) * sizeof(char *));
-        }
-    }
-    args[*argl] = NULL;
-    return 0;
-}
-
+/*
+\e   - ESC
+[01  - Bold
+[32m - Green
+[34m - Blue
+[m   - Restore to default (black)
+*/
 static char *get_prompt() {
     char hostname[255];
     gethostname(hostname, 255);
@@ -107,6 +40,7 @@ static char *get_prompt() {
     getcwd(cwd, PATH_MAX);
     char home[PATH_MAX];
     strcpy(home, getenv("HOME"));
+    // Shorten user home with '~'
     if (strstr(cwd, home) - cwd == 0)
         sprintf(prompt, "\e[01;32m%s@%s:\e[34m~%s\e[m$ ", getenv("USER"), hostname, cwd + strlen(home));
     else
@@ -116,27 +50,39 @@ static char *get_prompt() {
 
 int main(int argc, char const *argv[], char **envp)
 {
-    signal(SIGINT, handler_default);
-    setenv("SHELL", "gsh", 1);
+    char *path = NULL;              // Execution path
+    char **args = NULL;             // Arguments
+    signal(SIGINT, handler_ctrlc);  // Set singal handler
+    setenv("SHELL", "gsh", 1);      // Initialize ENV
+
+    // Main loop
     while (1) {
         sig_int = 0;
+        // Read input
         line = readline(get_prompt());
         if (sig_int)
             continue;
+        // Input finished (^D), exit
         if (line == NULL)
             break;
-        if (!*line)
+        // Filter valid command
+        char *real_line = trim(line);
+        if (!*real_line)
             continue;
-        int argl, ret = 0;
-        if (parse_args(trim(line), &argl)) {
+        add_history(line);  // Use up/down arrow to view history
+
+
+        int argl;           // Argument array length
+        int ret = 0;        // Whether `execvp()` succeed
+        if (parse_args(real_line, &path, &argl, &args)) {
             fprintf(stderr, "Syntax error\n");
-            for (int i = 0; i < argl; ++i)
-                free(args[i]);
-            free(args);
             continue;
         }
-        add_history(line);
+        _gc(line);  // Parse finished, no longer needed
+
+        // Built-in commands, `cd` has been implemented so far
         if (!strcmp(path, "cd")) {
+            // Come to HOME directory if no arguments
             if (!args[1]) {
                 chdir(getenv("HOME"));
                 setenv("PWD", getenv("HOME"), 1);
@@ -149,20 +95,25 @@ int main(int argc, char const *argv[], char **envp)
                 getcwd(cwd, PATH_MAX);
                 setenv("PWD", cwd, 1);
             }
+            clean_char_arr(argl, &args);
+            free(path);
             continue;
         }
-        _gc(line);
+
+        // Fork and execute a command
         int pid = fork();
         if (pid == 0) {
+            // Run program in the child process
             ret = execvp(path, args);
             if (ret)
+                // Failed
                 fprintf(stderr, "gsh: command not found: %s\n", args[0]);
             exit(0);
         } else {
+            // Wait for child process to finish 
+            // and goto next loop
             wait(&ret);
-            for (int i = 0; i < argl; ++i)
-                free(args[i]);
-            free(args);
+            clean_char_arr(argl, &args);
             free(path);
         }
     }

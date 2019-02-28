@@ -1,15 +1,10 @@
 #ifndef GSH_H
 #define GSH_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include "readline/readline.h"
+// Ignore SIGINT
+static void handler_ctrlc(int sig);
 
-#define _gc(ptr) \
-    if (ptr) { \
-        free(ptr); \
-        (ptr) = NULL; \
-    }
+// Generate prompt: User@Host:path$
+static char *get_prompt();
 
 #endif  // GSH_H

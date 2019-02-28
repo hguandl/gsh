@@ -1,0 +1,4 @@
+gsh
+*.o
+
+.DS_Store

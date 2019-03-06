@@ -6,7 +6,7 @@ Gsh is a toy software for operating system course, which is a good practice of c
 
 Current version: 1.0.1 | [ChangeLog](ChangeLog)
 
-Travis CI:
+Travis CI: [![Build Status](https://travis-ci.org/hguandl/gsh.svg?branch=master)](https://travis-ci.org/hguandl/gsh)
 
 ## Features
 - Bash-like prompt

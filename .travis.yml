@@ -1,0 +1,30 @@
+sudo: required
+language: c
+dist : trusty
+compiler:
+  - clang
+  - gcc
+os:
+  - linux
+  - osx
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew reinstall autoconf automake >> /dev/null 2>&1;
+    fi
+addons:
+  apt:
+    packages:
+      - libreadline-dev
+script:
+  - autoreconf --install --force
+  - ./configure
+  - make
+branches:
+  only:
+    - master
+notifications:
+  recipients:
+      - contact@hguandl.com
+  email:
+      on_success: change
+      on_failure: always

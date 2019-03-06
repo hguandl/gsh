@@ -57,13 +57,17 @@ dkms.conf
 
 # Autotools
 *.cache/
+.deps/
 *.in
 *.m4
+*.log
+*.status
 compile
 configure
 depcomp
 install-sh
 missing
+Makefile
 
 # Productions
 gsh

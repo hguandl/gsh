@@ -1,5 +1,11 @@
+gsh (1.0.1) unstable; urgency=low
+
+  * Add exit build-in command.
+
+ -- hguandl <me@hguandl.com> Wed, 06 Mar 2018 16:02:55 +0800
+
 gsh (1.0) unstable; urgency=low
 
   * Inital version.
 
- -- hguandl <me@hguandl.com> Wed, 06 Mar 2018 16:21:19 +0800
+ -- hguandl <me@hguandl.com> Wed, 06 Mar 2018 15:21:19 +0800

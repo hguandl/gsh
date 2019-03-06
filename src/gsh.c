@@ -20,6 +20,7 @@ static char prompt[1024];
 static void handler_ctrlc(int sig) {
     sig_int = 1;
     printf("\n");
+
     // Cleanup
     _gc(line);
     rl_free_line_state();
@@ -82,7 +83,8 @@ int main(int argc, char const *argv[], char **envp)
         }
         _gc(line);  // Parse finished, no longer needed
 
-        // Built-in commands, `cd` has been implemented so far
+        /** Built-in commands **/
+        // `cd`
         if (!strcmp(path, "cd")) {
             // Come to HOME directory if no arguments
             if (!args[1]) {
@@ -100,6 +102,13 @@ int main(int argc, char const *argv[], char **envp)
             clean_char_arr(argl, &args);
             free(path);
             continue;
+        }
+
+        // `exit`
+        if (!strcmp(path, "exit")) {
+            clean_char_arr(argl, &args);
+            free(path);
+            break;
         }
 
         // Fork and execute a command

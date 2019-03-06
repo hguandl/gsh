@@ -55,6 +55,16 @@ dkms.conf
 .DS_Store
 ._*
 
+# Autotools
+*.cache/
+*.in
+*.m4
+compile
+configure
+depcomp
+install-sh
+missing
+
 # Productions
 gsh
 

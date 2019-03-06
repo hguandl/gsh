@@ -4,7 +4,7 @@
 
 Gsh is a toy software for operating system course, which is a good practice of comprehending system calls including `fork()` and `exec()`. It is not stable, but for educational and experimental use. Please use under your own risk.
 
-Current version: 1.0.1 | [ChangeLog](ChangeLog)
+Current version: 1.0.2 | [ChangeLog](ChangeLog)
 
 Travis CI: [![Build Status](https://travis-ci.org/hguandl/gsh.svg?branch=master)](https://travis-ci.org/hguandl/gsh)
 
@@ -74,7 +74,7 @@ Open a new terminal and login, now you are using gsh.
 
 ## TODO
 - [ ] enviroment variables
-- [ ] .gsh_history
+- [x] .gsh_history
 - [ ] `;` (line separator)
 - [ ] `|` (pipe)
 - [ ] `if`

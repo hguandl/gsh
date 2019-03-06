@@ -16,6 +16,7 @@ int sig_int;
 
 static char *line = (char *)NULL;
 static char prompt[1024];
+static char history_file[256];
 
 static void handler_ctrlc(int sig) {
     sig_int = 1;
@@ -25,6 +26,10 @@ static void handler_ctrlc(int sig) {
     _gc(line);
     rl_free_line_state();
     rl_cleanup_after_signal();
+}
+
+static void gsh_history_file(char *filename) {
+    sprintf(filename, "%s/.gsh_history", getenv("HOME"));
 }
 
 /*
@@ -53,10 +58,12 @@ static char *get_prompt() {
 
 int main(int argc, char const *argv[], char **envp)
 {
-    char *path = NULL;              // Execution path
-    char **args = NULL;             // Arguments
-    signal(SIGINT, handler_ctrlc);  // Set singal handler
-    setenv("SHELL", argv[0], 1);      // Initialize ENV
+    char *path = NULL;               // Execution path
+    char **args = NULL;              // Arguments
+    signal(SIGINT, handler_ctrlc);   // Set singal handler
+    setenv("SHELL", argv[0], 1);     // Initialize ENV
+    gsh_history_file(history_file);  // History file
+    read_history(history_file);
 
     // Main loop
     while (1) {
@@ -129,5 +136,6 @@ int main(int argc, char const *argv[], char **envp)
         }
     }
     _gc(line);
+    write_history(history_file);
     return 0;
 }

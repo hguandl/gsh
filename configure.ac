@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([gsh], [1.0], [contact@hguandl.com])
+AC_INIT([gsh], [1.0.2], [contact@hguandl.com])
 AC_CONFIG_SRCDIR([src/gsh.c])
 AC_CONFIG_HEADERS([config.h])
 

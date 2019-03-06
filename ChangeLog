@@ -1,3 +1,9 @@
+gsh (1.0.2) unstable; urgency=low
+
+  * Add history file.
+
+ -- hguandl <me@hguandl.com> Wed, 06 Mar 2018 18:12:33 +0800
+
 gsh (1.0.1) unstable; urgency=low
 
   * Add exit build-in command.

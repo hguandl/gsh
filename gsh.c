@@ -42,9 +42,11 @@ static char *get_prompt() {
     strcpy(home, getenv("HOME"));
     // Shorten user home with '~'
     if (strstr(cwd, home) - cwd == 0)
-        sprintf(prompt, "\e[01;32m%s@%s:\e[34m~%s\e[m$ ", getenv("USER"), hostname, cwd + strlen(home));
+        sprintf(prompt, "\e[01;32m%s@%s:\e[34m~%s\e[m$ ",
+                        getenv("USER"), hostname, cwd + strlen(home));
     else
-        sprintf(prompt, "\e[01;32m%s@%s:\e[34m%s\e[m$ ", getenv("USER"), hostname, cwd);
+        sprintf(prompt, "\e[01;32m%s@%s:\e[34m%s\e[m$ ",
+                        getenv("USER"), hostname, cwd);
     return prompt;
 }
 
@@ -53,7 +55,7 @@ int main(int argc, char const *argv[], char **envp)
     char *path = NULL;              // Execution path
     char **args = NULL;             // Arguments
     signal(SIGINT, handler_ctrlc);  // Set singal handler
-    setenv("SHELL", "gsh", 1);      // Initialize ENV
+    setenv("SHELL", argv[0], 1);      // Initialize ENV
 
     // Main loop
     while (1) {
